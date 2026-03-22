@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>后台管理 - 紫薇文创三清观</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <!-- 引入 Quill 富文本编辑器 -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <style>
+        .tab-active { background-color: #b87c2e; color: white; }
+        .card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        .ql-editor { min-height: 200px; }
+        .lang-tab { cursor: pointer; padding: 6px 12px; border-radius: 8px; background: #f3f4f6; display: inline-block; margin-right: 8px; }
+        .lang-tab.active { background: #b87c2e; color: white; }
+        .hero-slide-card { border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; margin-bottom: 16px; background: white; }
+        .category-card { border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; margin-bottom: 12px; background: white; }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto p-6">
+        <h1 class="text-3xl font-bold mb-6">紫薇文创三清观 - 后台管理</h1>
+
+        <!-- 标签页 -->
+        <div class="flex flex-wrap gap-2 mb-6 border-b pb-2">
+            <button class="tab-btn px-4 py-2 rounded-t-lg" data-tab="products">📦 商品管理</button>
+            <button class="tab-btn px-4 py-2 rounded-t-lg" data-tab="hero">🎠 轮播图管理</button>
+            <button class="tab-btn px-4 py-2 rounded-t-lg" data-tab="categories">🏷️ 分类管理</button>
+            <button class="tab-btn px-4 py-2 rounded-t-lg" data-tab="global">⚙️ 全局设置</button>
+            <button class="tab-btn px-4 py-2 rounded-t-lg" data-tab="texts">📄 页面文案</button>
+        </div>
+
+        <!-- 商品管理 -->
+        <div id="products-tab" class="tab-content">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold">商品列表</h2>
+                <button onclick="showProductForm()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">+ 新增商品</button>
+            </div>
+            <div id="products-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+        </div>
+
+        <!-- 轮播图管理（分语言输入框） -->
+        <div id="hero-tab" class="tab-content hidden">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold">轮播图配置</h2>
+                <button onclick="addHeroSlide()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">+ 新增幻灯片</button>
+            </div>
+            <div id="hero-list" class="space-y-4"></div>
+        </div>
+
+        <!-- 分类管理（分语言输入框） -->
+        <div id="categories-tab" class="tab-content hidden">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold">商品分类</h2>
+                <button onclick="addCategory()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">+ 新增分类</button>
+            </div>
+            <div id="categories-list" class="space-y-3"></div>
+        </div>
+
+        <!-- 全局设置（分语言输入框） -->
+        <div id="global-tab" class="tab-content hidden">
+            <h2 class="text-2xl font-bold mb-4">全局设置</h2>
+            <form id="global-form" class="bg-white p-6 rounded shadow space-y-6">
+                <!-- 网站名称 -->
+                <div>
+                    <label class="block font-bold mb-2">网站名称</label>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div><label class="text-sm text-gray-600">简体中文</label><input type="text" id="siteName-zh-CN" class="w-full border p-2 rounded"></div>
+                        <div><label class="text-sm text-gray-600">繁體中文</label><input type="text" id="siteName-zh-TW" class="w-full border p-2 rounded"></div>
+                        <div><label class="text-sm text-gray-600">English</label><input type="text" id="siteName-en" class="w-full border p-2 rounded"></div>
+                        <div><label class="text-sm text-gray-600">日本語</label><input type="text" id="siteName-ja" class="w-full border p-2 rounded"></div>
+                    </div>
+                </div>
+                <!-- Logo -->
+                <div><label class="block font-bold mb-1">Logo 图片 URL</label><input type="text" id="logo" class="w-full border p-2 rounded"><button type="button" onclick="uploadImage('logo')" class="mt-1 text-sm bg-gray-200 px-3 py-1 rounded">上传图片</button></div>
+                <!-- 主题颜色 -->
+                <div><label class="block font-bold mb-1">主题颜色</label><input type="color" id="primaryColor" class="w-20 h-10"><span class="ml-2">主色</span></div>
+                <div><label class="block font-bold mb-1">背景颜色</label><input type="color" id="backgroundColor" class="w-20 h-10"></div>
+                <div><label class="block font-bold mb-1">文字颜色</label><input type="color" id="textColor" class="w-20 h-10"></div>
+                <div><label class="block font-bold mb-1">字体家族</label><input type="text" id="fontFamily" class="w-full border p-2 rounded" placeholder="例如: 'Noto Serif SC', serif"></div>
+                <div><label class="block font-bold mb-1">基础字号</label><input type="text" id="baseFontSize" class="w-32 border p-2 rounded" placeholder="16px"></div>
+                <div><label class="block font-bold mb-1">卡片背景色</label><input type="text" id="cardBgColor" class="w-full border p-2 rounded" placeholder="rgba(255,252,240,0.92)"></div>
+                <!-- 联系方式 -->
+                <div><label class="block font-bold mb-1">WhatsApp 号码</label><input type="text" id="whatsapp" class="w-full border p-2 rounded"></div>
+                <div><label class="block font-bold mb-1">LINE ID</label><input type="text" id="line" class="w-full border p-2 rounded"></div>
+                <div><label class="block font-bold mb-1">邮箱地址</label><input type="email" id="email" class="w-full border p-2 rounded"></div>
+                <!-- 页脚版权 -->
+                <div>
+                    <label class="block font-bold mb-2">页脚版权</label>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div><label class="text-sm text-gray-600">简体中文</label><input type="text" id="footer-zh-CN" class="w-full border p-2 rounded"></div>
+                        <div><label class="text-sm text-gray-600">繁體中文</label><input type="text" id="footer-zh-TW" class="w-full border p-2 rounded"></div>
+                        <div><label class="text-sm text-gray-600">English</label><input type="text" id="footer-en" class="w-full border p-2 rounded"></div>
+                        <div><label class="text-sm text-gray-600">日本語</label><input type="text" id="footer-ja" class="w-full border p-2 rounded"></div>
+                    </div>
+                </div>
+                <!-- 法事专区标题 -->
+                <div>
+                    <label class="block font-bold mb-2">法事专区标题</label>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div><label class="text-sm text-gray-600">简体中文</label><input type="text" id="ritualTitle-zh-CN" class="w-full border p-2 rounded"></div>
+                        <div><label class="text-sm text-gray-600">繁體中文</label><input type="text" id="ritualTitle-zh-TW" class="w-full border p-2 rounded"></div>
+                        <div><label class="text-sm text-gray-600">English</label><input type="text" id="ritualTitle-en" class="w-full border p-2 rounded"></div>
+                        <div><label class="text-sm text-gray-600">日本語</label><input type="text" id="ritualTitle-ja" class="w-full border p-2 rounded"></div>
+                    </div>
+                </div>
+                <!-- 法事专区描述 -->
+                <div>
+                    <label class="block font-bold mb-2">法事专区描述</label>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div><label class="text-sm text-gray-600">简体中文</label><textarea id="ritualDesc-zh-CN" rows="2" class="w-full border p-2 rounded"></textarea></div>
+                        <div><label class="text-sm text-gray-600">繁體中文</label><textarea id="ritualDesc-zh-TW" rows="2" class="w-full border p-2 rounded"></textarea></div>
+                        <div><label class="text-sm text-gray-600">English</label><textarea id="ritualDesc-en" rows="2" class="w-full border p-2 rounded"></textarea></div>
+                        <div><label class="text-sm text-gray-600">日本語</label><textarea id="ritualDesc-ja" rows="2" class="w-full border p-2 rounded"></textarea></div>
+                    </div>
+                </div>
+                <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">保存全局设置</button>
+            </form>
+        </div>
+
+        <!-- 页面文案管理（表格已满足直接打字） -->
+        <div id="texts-tab" class="tab-content hidden">
+            <h2 class="text-2xl font-bold mb-4">页面多语言文案</h2>
+            <div id="texts-editor" class="bg-white p-4 rounded shadow overflow-x-auto"></div>
+            <button onclick="savePageTexts()" class="mt-4 bg-blue-600 text-white px-6 py-2 rounded">保存文案</button>
+        </div>
+
+        <!-- 商品编辑模态框（分语言输入框+富文本） -->
+        <div id="product-modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg w-full max-w-4xl p-6 max-h-[90vh] overflow-auto">
+                <h3 class="text-xl font-bold mb-4">编辑商品</h3>
+                <form id="product-form">
+                    <input type="hidden" id="product-id">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div><label>分类</label><select id="product-category" class="w-full border p-2 rounded" required></select></div>
+                        <div><label>价格 (¥)</label><input type="number" id="product-price" class="w-full border p-2 rounded" required></div>
+                        <div><label>材质</label><input type="text" id="product-material" class="w-full border p-2 rounded"></div>
+                        <div><label>主图URL</label><input type="text" id="product-img" class="w-full border p-2 rounded"><button type="button" onclick="uploadImage('product-img')" class="mt-1 text-sm bg-gray-200 px-3 py-1 rounded">上传图片</button></div>
+                    </div>
+                    <!-- 商品名称分语言 -->
+                    <div class="mb-4">
+                        <label class="block font-bold mb-2">商品名称</label>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div><label class="text-sm text-gray-600">简体中文</label><input type="text" id="name-zh-CN" class="w-full border p-2 rounded"></div>
+                            <div><label class="text-sm text-gray-600">繁體中文</label><input type="text" id="name-zh-TW" class="w-full border p-2 rounded"></div>
+                            <div><label class="text-sm text-gray-600">English</label><input type="text" id="name-en" class="w-full border p-2 rounded"></div>
+                            <div><label class="text-sm text-gray-600">日本語</label><input type="text" id="name-ja" class="w-full border p-2 rounded"></div>
+                        </div>
+                    </div>
+                    <!-- 短描述分语言 -->
+                    <div class="mb-4">
+                        <label class="block font-bold mb-2">短描述</label>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div><label class="text-sm text-gray-600">简体中文</label><input type="text" id="shortDesc-zh-CN" class="w-full border p-2 rounded"></div>
+                            <div><label class="text-sm text-gray-600">繁體中文</label><input type="text" id="shortDesc-zh-TW" class="w-full border p-2 rounded"></div>
+                            <div><label class="text-sm text-gray-600">English</label><input type="text" id="shortDesc-en" class="w-full border p-2 rounded"></div>
+                            <div><label class="text-sm text-gray-600">日本語</label><input type="text" id="shortDesc-ja" class="w-full border p-2 rounded"></div>
+                        </div>
+                    </div>
+                    <!-- 富文本详情 -->
+                    <div class="mb-4">
+                        <label class="block font-bold mb-2">详细描述（多语言）</label>
+                        <div class="flex gap-2 mb-2" id="lang-tabs-container">
+                            <span class="lang-tab active" data-lang="zh-CN">简体中文</span>
+                            <span class="lang-tab" data-lang="zh-TW">繁體中文</span>
+                            <span class="lang-tab" data-lang="en">English</span>
+                            <span class="lang-tab" data-lang="ja">日本語</span>
+                        </div>
+                        <div id="quill-editor-container" style="height: 300px;"></div>
+                        <textarea id="product-descHtml" class="hidden"></textarea>
+                        <p class="text-xs text-gray-500 mt-1">点击工具栏的图片按钮即可上传图片并插入</p>
+                    </div>
+                    <div class="flex justify-end gap-2">
+                        <button type="button" onclick="closeProductModal()" class="bg-gray-400 text-white px-4 py-2 rounded">取消</button>
+                        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">保存</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <input type="file" id="image-upload" class="hidden" accept="image/*">
+    </div>
+
+    <script>
+        let currentData = null;
+        let currentEditProduct = null;
+        let quillEditor = null;
+        let currentLangForDesc = 'zh-CN';
+
+        // ==================== 通用函数 ====================
+        async function loadData() {
+            const res = await fetch('/api/data');
+            currentData = await res.json();
+            renderProducts();
+            renderHeroSlides();
+            renderCategories();
+            renderGlobalForm();
+            renderTextsEditor();
+        }
+
+        async function saveAllData() {
+            await fetch('/api/data', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(currentData) });
+            alert('保存成功');
+        }
+
+        // ==================== 商品管理 ====================
+        function renderProducts() {
+            const container = document.getElementById('products-list');
+            container.innerHTML = currentData.products.map(p => {
+                let displayName = p.name?.['zh-CN'] || p.name?.['zh-TW'] || p.name?.['en'] || p.name?.['ja'] || '无名称';
+                return `
+                    <div class="bg-white rounded shadow p-4 card-hover">
+                        <img src="${p.img}" class="w-full h-40 object-cover rounded mb-2" onerror="this.src='https://via.placeholder.com/400?text=No+Image'">
+                        <h3 class="font-bold">${displayName}</h3>
+                        <p>分类: ${p.categoryKey}</p>
+                        <p class="text-red-600 font-bold">¥${p.price}</p>
+                        <div class="flex gap-2 mt-2"><button onclick="editProduct(${p.id})" class="bg-blue-500 text-white px-3 py-1 rounded text-sm">编辑</button><button onclick="deleteProduct(${p.id})" class="bg-red-500 text-white px-3 py-1 rounded text-sm">删除</button></div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function editProduct(id) {
+            const p = currentData.products.find(p => p.id === id);
+            if (!p) return;
+            currentEditProduct = { ...p };
+            document.getElementById('product-id').value = p.id;
+            document.getElementById('product-category').value = p.categoryKey;
+            document.getElementById('product-img').value = p.img;
+            document.getElementById('product-price').value = p.price;
+            document.getElementById('product-material').value = p.material || '';
+            // 填充名称和短描述
+            document.getElementById('name-zh-CN').value = p.name?.['zh-CN'] || '';
+            document.getElementById('name-zh-TW').value = p.name?.['zh-TW'] || '';
+            document.getElementById('name-en').value = p.name?.['en'] || '';
+            document.getElementById('name-ja').value = p.name?.['ja'] || '';
+            document.getElementById('shortDesc-zh-CN').value = p.shortDesc?.['zh-CN'] || '';
+            document.getElementById('shortDesc-zh-TW').value = p.shortDesc?.['zh-TW'] || '';
+            document.getElementById('shortDesc-en').value = p.shortDesc?.['en'] || '';
+            document.getElementById('shortDesc-ja').value = p.shortDesc?.['ja'] || '';
+            // 初始化富文本编辑器
+            initQuill();
+            document.getElementById('product-descHtml').value = JSON.stringify(p.descHtml || {}, null, 2);
+            currentLangForDesc = 'zh-CN';
+            loadDescHtmlForLang(currentLangForDesc);
+            document.querySelectorAll('.lang-tab').forEach(tab => {
+                if (tab.dataset.lang === currentLangForDesc) tab.classList.add('active');
+                else tab.classList.remove('active');
+            });
+            bindLangTabs();
+            document.getElementById('product-modal').classList.remove('hidden');
+        }
+
+        function showProductForm() {
+            currentEditProduct = { id: null, categoryKey: '', img: '', price: 0, material: '', name: {}, shortDesc: {}, descHtml: {} };
+            document.getElementById('product-id').value = '';
+            document.getElementById('product-category').value = '';
+            document.getElementById('product-img').value = '';
+            document.getElementById('product-price').value = '';
+            document.getElementById('product-material').value = '';
+            document.querySelectorAll('#product-form input[type="text"], #product-form input[type="number"]').forEach(el => el.value = '');
+            initQuill();
+            quillEditor.root.innerHTML = '';
+            currentLangForDesc = 'zh-CN';
+            loadDescHtmlForLang(currentLangForDesc);
+            document.querySelectorAll('.lang-tab').forEach(tab => {
+                if (tab.dataset.lang === currentLangForDesc) tab.classList.add('active');
+                else tab.classList.remove('active');
+            });
+            bindLangTabs();
+            const catSelect = document.getElementById('product-category');
+            catSelect.innerHTML = currentData.config.categories.map(cat => `<option value="${cat.key}">${cat.key}</option>`).join('');
+            document.getElementById('product-modal').classList.remove('hidden');
+        }
+
+        function deleteProduct(id) {
+            if (confirm('确定删除此商品吗？')) {
+                currentData.products = currentData.products.filter(p => p.id !== id);
+                saveAllData().then(() => renderProducts());
+            }
+        }
+
+        // 富文本编辑器相关
+        function initQuill() {
+            if (quillEditor) return;
+            quillEditor = new Quill('#quill-editor-container', {
+                theme: 'snow',
+                placeholder: '在这里编写商品详情，可以直接插入图片...',
+                modules: {
+                    toolbar: {
+                        container: [
+                            [{ 'header': [1, 2, 3, false] }],
+                            ['bold', 'italic', 'underline', 'strike'],
+                            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                            ['link', 'image'],
+                            ['clean']
+                        ],
+                        handlers: { image: imageHandler }
+                    }
+                }
+            });
+        }
+
+        function imageHandler() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.click();
+            input.onchange = async () => {
+                const file = input.files[0];
+                if (!file) return;
+                const formData = new FormData();
+                formData.append('image', file);
+                const res = await fetch('/api/upload', { method: 'POST', body: formData });
+                const data = await res.json();
+                if (data.url) {
+                    const range = quillEditor.getSelection(true);
+                    quillEditor.insertEmbed(range.index, 'image', data.url);
+                } else alert('图片上传失败');
+            };
+        }
+
+        function loadDescHtmlForLang(lang) {
+            if (!currentEditProduct) return;
+            const html = currentEditProduct.descHtml?.[lang] || '';
+            quillEditor.root.innerHTML = html;
+        }
+
+        function saveCurrentDescToProduct() {
+            if (!currentEditProduct) return;
+            const html = quillEditor.root.innerHTML;
+            if (!currentEditProduct.descHtml) currentEditProduct.descHtml = {};
+            currentEditProduct.descHtml[currentLangForDesc] = html;
+            document.getElementById('product-descHtml').value = JSON.stringify(currentEditProduct.descHtml, null, 2);
+        }
+
+        function bindLangTabs() {
+            document.querySelectorAll('.lang-tab').forEach(tab => {
+                tab.removeEventListener('click', langTabClick);
+                tab.addEventListener('click', langTabClick);
+            });
+        }
+
+        function langTabClick(e) {
+            saveCurrentDescToProduct();
+            document.querySelectorAll('.lang-tab').forEach(t => t.classList.remove('active'));
+            e.target.classList.add('active');
+            currentLangForDesc = e.target.dataset.lang;
+            loadDescHtmlForLang(currentLangForDesc);
+        }
+
+        document.getElementById('product-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            saveCurrentDescToProduct();
+            const id = document.getElementById('product-id').value;
+            const productData = {
+                id: id ? parseInt(id) : undefined,
+                categoryKey: document.getElementById('product-category').value,
+                img: document.getElementById('product-img').value,
+                price: parseFloat(document.getElementById('product-price').value),
+                material: document.getElementById('product-material').value,
+                name: {
+                    "zh-CN": document.getElementById('name-zh-CN').value,
+                    "zh-TW": document.getElementById('name-zh-TW').value,
+                    "en": document.getElementById('name-en').value,
+                    "ja": document.getElementById('name-ja').value
+                },
+                shortDesc: {
+                    "zh-CN": document.getElementById('shortDesc-zh-CN').value,
+                    "zh-TW": document.getElementById('shortDesc-zh-TW').value,
+                    "en": document.getElementById('shortDesc-en').value,
+                    "ja": document.getElementById('shortDesc-ja').value
+                },
+                descHtml: currentEditProduct.descHtml || {}
+            };
+            if (id) {
+                const index = currentData.products.findIndex(p => p.id == id);
+                if (index !== -1) currentData.products[index] = { ...currentData.products[index], ...productData, id: parseInt(id) };
+            } else {
+                productData.id = Date.now();
+                currentData.products.push(productData);
+            }
+            await saveAllData();
+            closeProductModal();
+            renderProducts();
+        });
+
+        function closeProductModal() {
+            document.getElementById('product-modal').classList.add('hidden');
+            if (quillEditor) quillEditor = null;
+        }
+
+        // ==================== 轮播图管理（分语言输入框） ====================
+        function renderHeroSlides() {
+            const container = document.getElementById('hero-list');
+            container.innerHTML = currentData.heroSlides.map((slide, idx) => `
+                <div class="hero-slide-card">
+                    <div class="flex justify-between items-start mb-3">
+                        <h3 class="font-bold text-lg">幻灯片 ${idx+1}</h3>
+                        <button onclick="removeHeroSlide(${idx})" class="text-red-500"><i class="fa-solid fa-trash"></i> 删除</button>
+                    </div>
+                    <div class="mb-3">
+                        <label class="block font-medium mb-1">图片URL</label>
+                        <input type="text" class="w-full border p-2 rounded" value="${slide.img}" onchange="updateHeroSlide(${idx}, 'img', this.value)">
+                        <button type="button" onclick="uploadHeroImage(${idx})" class="mt-1 text-sm bg-gray-200 px-3 py-1 rounded">上传图片</button>
+                    </div>
+                    <div class="mb-2">
+                        <label class="block font-medium mb-1">显示太极图</label>
+                        <input type="checkbox" ${slide.showTaiji ? 'checked' : ''} onchange="updateHeroSlide(${idx}, 'showTaiji', this.checked)">
+                    </div>
+                    <div>
+                        <label class="block font-medium mb-1">主标题</label>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-2">
+                            <div><label class="text-xs">简体中文</label><input type="text" class="w-full border p-1 rounded" value="${slide.mainTitle?.['zh-CN'] || ''}" onchange="updateHeroTitle(${idx}, 'zh-CN', this.value)"></div>
+                            <div><label class="text-xs">繁體中文</label><input type="text" class="w-full border p-1 rounded" value="${slide.mainTitle?.['zh-TW'] || ''}" onchange="updateHeroTitle(${idx}, 'zh-TW', this.value)"></div>
+                            <div><label class="text-xs">English</label><input type="text" class="w-full border p-1 rounded" value="${slide.mainTitle?.['en'] || ''}" onchange="updateHeroTitle(${idx}, 'en', this.value)"></div>
+                            <div><label class="text-xs">日本語</label><input type="text" class="w-full border p-1 rounded" value="${slide.mainTitle?.['ja'] || ''}" onchange="updateHeroTitle(${idx}, 'ja', this.value)"></div>
+                        </div>
+                        <label class="block font-medium mb-1 mt-2">副标题</label>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div><label class="text-xs">简体中文</label><input type="text" class="w-full border p-1 rounded" value="${slide.subtitle?.['zh-CN'] || ''}" onchange="updateHeroSubtitle(${idx}, 'zh-CN', this.value)"></div>
+                            <div><label class="text-xs">繁體中文</label><input type="text" class="w-full border p-1 rounded" value="${slide.subtitle?.['zh-TW'] || ''}" onchange="updateHeroSubtitle(${idx}, 'zh-TW', this.value)"></div>
+                            <div><label class="text-xs">English</label><input type="text" class="w-full border p-1 rounded" value="${slide.subtitle?.['en'] || ''}" onchange="updateHeroSubtitle(${idx}, 'en', this.value)"></div>
+                            <div><label class="text-xs">日本語</label><input type="text" class="w-full border p-1 rounded" value="${slide.subtitle?.['ja'] || ''}" onchange="updateHeroSubtitle(${idx}, 'ja', this.value)"></div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateHeroSlide(index, field, value) {
+            if (field === 'img') currentData.heroSlides[index][field] = value;
+            else if (field === 'showTaiji') currentData.heroSlides[index][field] = value;
+            saveAllData();
+        }
+        function updateHeroTitle(index, lang, value) {
+            if (!currentData.heroSlides[index].mainTitle) currentData.heroSlides[index].mainTitle = {};
+            currentData.heroSlides[index].mainTitle[lang] = value;
+            saveAllData();
+        }
+        function updateHeroSubtitle(index, lang, value) {
+            if (!currentData.heroSlides[index].subtitle) currentData.heroSlides[index].subtitle = {};
+            currentData.heroSlides[index].subtitle[lang] = value;
+            saveAllData();
+        }
+        function addHeroSlide() {
+            currentData.heroSlides.push({
+                img: "https://via.placeholder.com/2000x800?text=New+Slide",
+                mainTitle: { "zh-CN": "", "zh-TW": "", "en": "", "ja": "" },
+                subtitle: { "zh-CN": "", "zh-TW": "", "en": "", "ja": "" },
+                showTaiji: false
+            });
+            saveAllData().then(() => renderHeroSlides());
+        }
+        function removeHeroSlide(index) {
+            if (confirm('删除此幻灯片？')) {
+                currentData.heroSlides.splice(index, 1);
+                saveAllData().then(() => renderHeroSlides());
+            }
+        }
+        function uploadHeroImage(index) {
+            const fileInput = document.getElementById('image-upload');
+            fileInput.onchange = async () => {
+                const file = fileInput.files[0];
+                if (!file) return;
+                const formData = new FormData();
+                formData.append('image', file);
+                const res = await fetch('/api/upload', { method: 'POST', body: formData });
+                const data = await res.json();
+                if (data.url) {
+                    currentData.heroSlides[index].img = data.url;
+                    saveAllData().then(() => renderHeroSlides());
+                } else alert('上传失败');
+                fileInput.value = '';
+            };
+            fileInput.click();
+        }
+
+        // ==================== 分类管理（分语言输入框） ====================
+        function renderCategories() {
+            const container = document.getElementById('categories-list');
+            container.innerHTML = currentData.config.categories.map((cat, idx) => `
+                <div class="category-card">
+                    <div class="flex justify-between items-center mb-2">
+                        <strong class="text-lg">${cat.key}</strong>
+                        <button onclick="deleteCategory(${idx})" class="text-red-500"><i class="fa-solid fa-trash"></i> 删除</button>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div><label class="text-xs">简体中文</label><input type="text" class="w-full border p-1 rounded" value="${cat.name?.['zh-CN'] || ''}" onchange="updateCategoryName(${idx}, 'zh-CN', this.value)"></div>
+                        <div><label class="text-xs">繁體中文</label><input type="text" class="w-full border p-1 rounded" value="${cat.name?.['zh-TW'] || ''}" onchange="updateCategoryName(${idx}, 'zh-TW', this.value)"></div>
+                        <div><label class="text-xs">English</label><input type="text" class="w-full border p-1 rounded" value="${cat.name?.['en'] || ''}" onchange="updateCategoryName(${idx}, 'en', this.value)"></div>
+                        <div><label class="text-xs">日本語</label><input type="text" class="w-full border p-1 rounded" value="${cat.name?.['ja'] || ''}" onchange="updateCategoryName(${idx}, 'ja', this.value)"></div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateCategoryName(index, lang, value) {
+            if (!currentData.config.categories[index].name) currentData.config.categories[index].name = {};
+            currentData.config.categories[index].name[lang] = value;
+            saveAllData();
+        }
+
+        function addCategory() {
+            const newKey = prompt('请输入分类标识（英文或拼音，如 new-category）');
+            if (!newKey) return;
+            currentData.config.categories.push({ key: newKey, name: { "zh-CN": "", "zh-TW": "", "en": "", "ja": "" } });
+            saveAllData().then(() => renderCategories());
+        }
+
+        function deleteCategory(index) {
+            if (confirm('删除分类会同时删除该分类下的所有商品，确定吗？')) {
+                const catKey = currentData.config.categories[index].key;
+                currentData.products = currentData.products.filter(p => p.categoryKey !== catKey);
+                currentData.config.categories.splice(index, 1);
+                saveAllData().then(() => { renderCategories(); renderProducts(); });
+            }
+        }
+
+        // ==================== 全局设置（分语言输入框） ====================
+        function renderGlobalForm() {
+            const cfg = currentData.config;
+            document.getElementById('siteName-zh-CN').value = cfg.siteName?.['zh-CN'] || '';
+            document.getElementById('siteName-zh-TW').value = cfg.siteName?.['zh-TW'] || '';
+            document.getElementById('siteName-en').value = cfg.siteName?.['en'] || '';
+            document.getElementById('siteName-ja').value = cfg.siteName?.['ja'] || '';
+            document.getElementById('logo').value = cfg.logo || '';
+            document.getElementById('primaryColor').value = cfg.theme.primaryColor || '#b87c2e';
+            document.getElementById('backgroundColor').value = cfg.theme.backgroundColor || '#fef9ef';
+            document.getElementById('textColor').value = cfg.theme.textColor || '#2e241f';
+            document.getElementById('fontFamily').value = cfg.theme.fontFamily;
+            document.getElementById('baseFontSize').value = cfg.theme.baseFontSize;
+            document.getElementById('cardBgColor').value = cfg.theme.cardBgColor;
+            document.getElementById('whatsapp').value = cfg.contacts.whatsapp;
+            document.getElementById('line').value = cfg.contacts.line;
+            document.getElementById('email').value = cfg.contacts.email || '';
+            document.getElementById('footer-zh-CN').value = cfg.footer?.['zh-CN'] || '';
+            document.getElementById('footer-zh-TW').value = cfg.footer?.['zh-TW'] || '';
+            document.getElementById('footer-en').value = cfg.footer?.['en'] || '';
+            document.getElementById('footer-ja').value = cfg.footer?.['ja'] || '';
+            document.getElementById('ritualTitle-zh-CN').value = cfg.ritualSection.title?.['zh-CN'] || '';
+            document.getElementById('ritualTitle-zh-TW').value = cfg.ritualSection.title?.['zh-TW'] || '';
+            document.getElementById('ritualTitle-en').value = cfg.ritualSection.title?.['en'] || '';
+            document.getElementById('ritualTitle-ja').value = cfg.ritualSection.title?.['ja'] || '';
+            document.getElementById('ritualDesc-zh-CN').value = cfg.ritualSection.description?.['zh-CN'] || '';
+            document.getElementById('ritualDesc-zh-TW').value = cfg.ritualSection.description?.['zh-TW'] || '';
+            document.getElementById('ritualDesc-en').value = cfg.ritualSection.description?.['en'] || '';
+            document.getElementById('ritualDesc-ja').value = cfg.ritualSection.description?.['ja'] || '';
+        }
+
+        document.getElementById('global-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            // 组装数据
+            currentData.config.siteName = {
+                "zh-CN": document.getElementById('siteName-zh-CN').value,
+                "zh-TW": document.getElementById('siteName-zh-TW').value,
+                "en": document.getElementById('siteName-en').value,
+                "ja": document.getElementById('siteName-ja').value
+            };
+            currentData.config.logo = document.getElementById('logo').value;
+            currentData.config.theme.primaryColor = document.getElementById('primaryColor').value;
+            currentData.config.theme.backgroundColor = document.getElementById('backgroundColor').value;
+            currentData.config.theme.textColor = document.getElementById('textColor').value;
+            currentData.config.theme.fontFamily = document.getElementById('fontFamily').value;
+            currentData.config.theme.baseFontSize = document.getElementById('baseFontSize').value;
+            currentData.config.theme.cardBgColor = document.getElementById('cardBgColor').value;
+            currentData.config.contacts.whatsapp = document.getElementById('whatsapp').value;
+            currentData.config.contacts.line = document.getElementById('line').value;
+            currentData.config.contacts.email = document.getElementById('email').value;
+            currentData.config.footer = {
+                "zh-CN": document.getElementById('footer-zh-CN').value,
+                "zh-TW": document.getElementById('footer-zh-TW').value,
+                "en": document.getElementById('footer-en').value,
+                "ja": document.getElementById('footer-ja').value
+            };
+            currentData.config.ritualSection.title = {
+                "zh-CN": document.getElementById('ritualTitle-zh-CN').value,
+                "zh-TW": document.getElementById('ritualTitle-zh-TW').value,
+                "en": document.getElementById('ritualTitle-en').value,
+                "ja": document.getElementById('ritualTitle-ja').value
+            };
+            currentData.config.ritualSection.description = {
+                "zh-CN": document.getElementById('ritualDesc-zh-CN').value,
+                "zh-TW": document.getElementById('ritualDesc-zh-TW').value,
+                "en": document.getElementById('ritualDesc-en').value,
+                "ja": document.getElementById('ritualDesc-ja').value
+            };
+            await saveAllData();
+            alert('全局设置已保存');
+        });
+
+        // ==================== 页面文案管理（表格已满足直接打字） ====================
+        function renderTextsEditor() {
+            const container = document.getElementById('texts-editor');
+            const languages = ['zh-CN', 'zh-TW', 'en', 'ja'];
+            container.innerHTML = `
+                <table class="w-full border text-sm"><thead><tr class="bg-gray-200"><th>语言</th><th>导航标题</th><th>关于标题</th><th>关于描述</th>   </thead><tbody>
+                ${languages.map(lang => `
+                    <tr><td class="border p-2 font-bold">${lang}   </td>
+                    <td class="border p-2"><input type="text" data-lang="${lang}" data-field="navTitle" value="${currentData.pageTexts[lang]?.navTitle || ''}" class="w-full"></td>
+                    <td class="border p-2"><input type="text" data-lang="${lang}" data-field="aboutTitle" value="${currentData.pageTexts[lang]?.aboutTitle || ''}" class="w-full"></td>
+                    <td class="border p-2"><textarea data-lang="${lang}" data-field="aboutDesc" rows="2" class="w-full">${currentData.pageTexts[lang]?.aboutDesc || ''}</textarea></td>
+                   </tr>
+                `).join('')}</tbody>
+               </table>
+            `;
+            document.querySelectorAll('#texts-editor input, #texts-editor textarea').forEach(el => {
+                el.addEventListener('change', () => {
+                    const lang = el.dataset.lang;
+                    const field = el.dataset.field;
+                    if (!currentData.pageTexts[lang]) currentData.pageTexts[lang] = {};
+                    currentData.pageTexts[lang][field] = el.value;
+                    saveAllData();
+                });
+            });
+        }
+
+        function savePageTexts() { saveAllData(); }
+
+        // ==================== 通用图片上传 ====================
+        function uploadImage(targetId) {
+            const fileInput = document.getElementById('image-upload');
+            fileInput.onchange = async () => {
+                const file = fileInput.files[0];
+                if (!file) return;
+                const formData = new FormData();
+                formData.append('image', file);
+                const res = await fetch('/api/upload', { method: 'POST', body: formData });
+                const data = await res.json();
+                if (data.url) document.getElementById(targetId).value = data.url;
+                else alert('上传失败');
+                fileInput.value = '';
+            };
+            fileInput.click();
+        }
+
+        // ==================== 标签切换 ====================
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+                document.getElementById(btn.dataset.tab + '-tab').classList.remove('hidden');
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('tab-active'));
+                btn.classList.add('tab-active');
+            });
+        });
+
+        loadData();
+    </script>
+</body>
+</html>

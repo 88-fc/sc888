@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
+    <title>紫薇文创三清观</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <style id="dynamic-style"></style>
+    <style>
+        .taiji-spin { animation: taoRotate 24s infinite linear; display: inline-block; }
+        @keyframes taoRotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .product-card {
+            transition: all 0.4s ease;
+            border-radius: 1.5rem;
+            box-shadow: 0 12px 28px -10px rgba(60, 40, 20, 0.2);
+        }
+        .product-card:hover { transform: translateY(-8px); box-shadow: 0 25px 40px -12px rgba(100, 70, 30, 0.35); }
+        .category-active { background: linear-gradient(135deg, #6b3e1c, var(--primary-color)) !important; color: #fff3e0 !important; }
+        .price-now { font-size: 1.8rem; font-weight: 800; color: #c73c00; }
+        .product-detail-html img { max-width: 100%; border-radius: 12px; margin: 8px 0; }
+        .modal-pop { animation: modalSlide 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1); }
+        @keyframes modalSlide {
+            from { opacity: 0; transform: scale(0.95) translateY(15px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+    </style>
+</head>
+<body class="relative">
+    <div class="relative z-10">
+        <!-- 导航栏 -->
+        <nav class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-amber-200/60">
+            <div class="max-w-7xl mx-auto px-5 md:px-8 py-3 flex flex-wrap items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                    <div class="text-5xl taiji-spin">☯️</div>
+                    <img id="site-logo" class="h-10 hidden" alt="Logo">
+                    <h1 id="nav-title" class="text-2xl md:text-3xl font-bold tracking-wider gold-text">紫薇文创三清观</h1>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div id="lang-switcher" class="flex gap-2 text-sm font-medium"></div>
+                    <button onclick="toggleCartSidebar()" class="relative text-2xl hover:text-amber-700 transition">
+                        <i class="fa-solid fa-cart-shopping"></i>
+                        <span id="cart-count" class="absolute -top-2 -right-2 bg-amber-700 text-white text-[11px] w-5 h-5 rounded-full flex items-center justify-center font-bold">0</span>
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- 轮播图 -->
+        <section class="relative h-[55vh] md:h-[70vh] overflow-hidden shadow-xl">
+            <div class="swiper hero-swiper h-full">
+                <div class="swiper-wrapper" id="hero-slider"></div>
+                <div class="swiper-pagination !bottom-4"></div>
+            </div>
+        </section>
+
+        <!-- 商品区 -->
+        <section id="shop" class="max-w-7xl mx-auto px-5 md:px-8 py-14 relative">
+            <div class="text-center mb-10">
+                <div class="inline-block bg-amber-100/60 px-8 py-2 rounded-full backdrop-blur-sm border border-amber-300"><span class="text-amber-800 tracking-wider">✦ 开光圣品 灵应十方 ✦</span></div>
+                <h2 class="text-4xl md:text-5xl font-bold gold-text mt-4">靈寶法器</h2>
+                <div class="w-24 h-0.5 bg-gradient-to-r from-transparent via-amber-500 to-transparent mx-auto mt-3"></div>
+            </div>
+            <div id="category-tabs" class="flex flex-wrap gap-3 justify-center mb-12"></div>
+            <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-7"></div>
+        </section>
+
+        <!-- 法事专区 -->
+        <section class="relative overflow-hidden py-16 my-4 bg-gradient-to-b from-amber-50/70 to-white/80 border-y border-amber-200/60">
+            <div class="max-w-6xl mx-auto px-6 text-center relative">
+                <i class="fa-solid fa-feather-pointed text-6xl text-amber-700 mb-4"></i>
+                <h3 id="ritual-title" class="text-3xl font-bold text-stone-800 mb-3">高功法师 · 先天奏斗科仪</h3>
+                <p id="ritual-desc" class="text-amber-800 max-w-2xl mx-auto mb-6 leading-relaxed"></p>
+                <div class="flex flex-wrap justify-center gap-5">
+                    <a id="ritual-wa" href="#" target="_blank" class="inline-flex items-center gap-2 bg-amber-800 hover:bg-amber-900 text-white px-8 py-3 rounded-full text-lg shadow-md transition"><i class="fa-brands fa-whatsapp text-xl"></i> WhatsApp</a>
+                    <a id="ritual-line" href="#" target="_blank" class="inline-flex items-center gap-2 bg-green-700 hover:bg-green-800 text-white px-8 py-3 rounded-full text-lg shadow-md transition"><i class="fa-brands fa-line text-xl"></i> LINE</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- 关于我们 -->
+        <section class="bg-white/60 backdrop-blur-sm py-14">
+            <div class="max-w-5xl mx-auto px-6 text-center rounded-2xl shadow-md py-8 bg-white/40">
+                <h2 id="about-title" class="text-3xl md:text-4xl font-bold mb-5 gold-text"></h2>
+                <p id="about-desc" class="text-lg leading-loose text-stone-700 max-w-3xl mx-auto"></p>
+                <div class="mt-8 flex justify-center gap-8 text-amber-700 text-sm flex-wrap">
+                    <span><i class="fa-regular fa-calendar-alt"></i> 开光择吉日</span>
+                    <span><i class="fa-solid fa-yin-yang"></i> 正统道教科仪</span>
+                    <span><i class="fa-solid fa-feather"></i> 全球速递·灵宝结缘</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- 购物车侧边栏 -->
+        <div id="cart-sidebar" class="fixed top-0 right-0 h-full w-80 bg-amber-50 z-50 shadow-2xl transform translate-x-full transition-transform duration-300 flex flex-col border-l border-amber-300">
+            <div class="p-5 border-b border-amber-200 flex justify-between items-center bg-amber-100/70">
+                <h3 class="text-xl font-bold"><i class="fa-solid fa-cart-shopping mr-2"></i>法物流通</h3>
+                <button onclick="toggleCartSidebar()" class="text-2xl text-stone-600 hover:text-amber-800">&times;</button>
+            </div>
+            <div id="cart-items" class="flex-1 overflow-y-auto p-4 space-y-4"></div>
+            <div class="p-4 border-t border-amber-200 bg-amber-50/90">
+                <div class="flex justify-between font-bold text-lg mb-3"><span>缘金总计:</span><span id="cart-total" class="gold-text">¥0</span></div>
+                <button onclick="checkoutCart()" class="w-full bg-amber-700 text-white py-3 rounded-full font-bold hover:bg-amber-800 transition shadow">请缘下单</button>
+            </div>
+        </div>
+        <div id="cart-overlay" class="fixed inset-0 bg-black/40 z-40 hidden backdrop-blur-sm" onclick="toggleCartSidebar()"></div>
+
+        <!-- 浮动咨询 -->
+        <div class="fixed bottom-7 right-7 flex flex-col gap-3 z-40">
+            <a id="float-wa" href="#" target="_blank" class="bg-[#25D366] hover:bg-[#128C7E] text-white w-14 h-14 rounded-full flex items-center justify-center shadow-xl text-3xl transition-all"><i class="fa-brands fa-whatsapp"></i></a>
+            <a id="float-line" href="#" target="_blank" class="bg-[#00B900] hover:bg-[#009900] text-white w-14 h-14 rounded-full flex items-center justify-center shadow-xl text-3xl transition-all"><i class="fa-brands fa-line"></i></a>
+        </div>
+
+        <!-- 商品详情弹窗 -->
+        <div id="modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 overflow-auto">
+            <div class="bg-white max-w-4xl w-full rounded-2xl overflow-hidden modal-pop shadow-2xl my-8">
+                <div class="flex flex-col md:flex-row">
+                    <div class="md:w-5/12 bg-amber-50/30 p-4 flex items-center justify-center border-r border-amber-100">
+                        <img id="modal-image" class="w-full rounded-xl shadow-md object-cover" style="max-height: 380px;" alt="法器">
+                    </div>
+                    <div class="md:w-7/12 p-6">
+                        <button onclick="closeModal()" class="float-right text-2xl text-gray-400 hover:text-gray-700">✕</button>
+                        <h3 id="modal-title" class="text-2xl font-bold text-stone-800 pr-8"></h3>
+                        <div class="mt-2 flex items-center gap-2">
+                            <span class="bg-amber-100 text-amber-800 text-xs px-2 py-1 rounded-full">⚡ 高功开光</span>
+                            <span class="text-gray-400 text-xs">已结缘 1200+</span>
+                        </div>
+                        <div class="mt-4"><span class="price-now" id="modal-price">¥0</span></div>
+                        <div class="detail-property mt-4 bg-amber-50 p-3 rounded-lg">
+                            <div class="grid grid-cols-2 gap-2 text-sm">
+                                <div><span class="text-gray-500">开光宫观：</span><span class="font-medium">江西龙虎山·天师府</span></div>
+                                <div><span class="text-gray-500">加持道长：</span><span class="font-medium">罗宇真人</span></div>
+                                <div><span class="text-gray-500">材质：</span><span id="modal-material" class="font-medium">雷击枣木</span></div>
+                                <div><span class="text-gray-500">快递：</span><span class="font-medium">顺丰包邮</span></div>
+                            </div>
+                        </div>
+                        <div id="modal-desc" class="product-detail-html text-gray-600 mt-4 text-sm leading-relaxed border-t pt-3 border-gray-100"></div>
+                        <div class="grid grid-cols-3 gap-3 mt-6">
+                            <button onclick="addToCartFromModal()" class="bg-amber-600 hover:bg-amber-700 text-white py-3 rounded-xl font-medium flex items-center justify-center gap-2 transition"><i class="fa-solid fa-cart-plus"></i> 加入请缘</button>
+                            <a id="modal-wa" href="#" target="_blank" class="bg-[#25D366] text-white py-3 rounded-xl flex justify-center items-center text-lg"><i class="fa-brands fa-whatsapp"></i></a>
+                            <a id="modal-line" href="#" target="_blank" class="bg-[#00B900] text-white py-3 rounded-xl flex justify-center items-center text-lg"><i class="fa-brands fa-line"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="bg-stone-800 text-stone-300 py-10 text-sm mt-8">
+            <div class="max-w-7xl mx-auto px-6 grid md:grid-cols-3 gap-8">
+                <div><div class="flex items-center gap-2 text-2xl font-bold gold-text mb-3"><span>☯️</span> <span id="footer-site-name">紫薇文创三清观</span></div><p class="text-stone-400">正一派玄裔弟子 · 济世利人</p></div>
+                <div><h4 class="font-bold text-amber-300 mb-2">宫观资讯</h4><p>負責人：羅信道長</p><p>統一編號：88391247</p><p>地址：台北市萬華區西園路二段320巷12號</p></div>
+                <div><h4 class="font-bold text-amber-300 mb-2">法物流通說明</h4><p>开光圣品非质量问题不退换，7日内联系客服</p><p>隱私政策：僅用於法事登記與訂單確認</p><div class="flex gap-4 mt-3"><a id="footer-wa" href="#" class="hover:text-green-400 text-xl"><i class="fa-brands fa-whatsapp"></i></a><a id="footer-line" href="#" class="hover:text-green-400 text-xl"><i class="fa-brands fa-line"></i></a></div></div>
+            </div>
+            <div id="footer-copyright" class="text-center pt-8 border-t border-stone-700 mt-6 text-stone-500 text-xs"></div>
+        </footer>
+    </div>
+
+    <script>
+        // 全局变量
+        let appData = null;
+        let currentLang = 'zh-CN';
+        let cart = [];
+        let currentCategory = "全部";
+
+        // 获取多语言字段
+        function getLocalized(obj, lang) {
+            if (!obj) return '';
+            return obj[lang] || obj['zh-CN'] || '';
+        }
+
+        // 加载数据
+        async function loadData() {
+            const res = await fetch('/api/data');
+            appData = await res.json();
+            applyTheme(appData.config.theme);
+            updateContactLinks(appData.config.contacts);
+            updateSiteInfo(appData.config);
+            renderHero();
+            renderPageTexts();
+            renderRitualSection();
+            renderProducts();
+            renderCategories();
+            updateCartUI();
+            renderLangSwitcher();
+            initSwiper();
+        }
+
+        // 应用主题样式
+        function applyTheme(theme) {
+            const style = document.getElementById('dynamic-style');
+            style.innerHTML = `
+                :root {
+                    --primary-color: ${theme.primaryColor};
+                    --bg-color: ${theme.backgroundColor};
+                    --font-family: ${theme.fontFamily};
+                    --base-font-size: ${theme.baseFontSize};
+                    --card-bg: ${theme.cardBgColor};
+                    --text-color: ${theme.textColor || '#2e241f'};
+                }
+                body {
+                    background-color: var(--bg-color);
+                    font-family: var(--font-family);
+                    font-size: var(--base-font-size);
+                    color: var(--text-color);
+                }
+                .gold-text { color: var(--primary-color); }
+                .product-card { background: var(--card-bg); }
+                .category-active { background: linear-gradient(135deg, #6b3e1c, var(--primary-color)) !important; }
+            `;
+        }
+
+        // 更新联系链接
+        function updateContactLinks(contacts) {
+            const waLink = `https://wa.me/${contacts.whatsapp}?text=`;
+            const lineLink = `https://line.me/ti/p/${contacts.line}?text=`;
+            document.querySelectorAll('#ritual-wa, #float-wa, #footer-wa, #modal-wa').forEach(a => a.href = waLink);
+            document.querySelectorAll('#ritual-line, #float-line, #footer-line, #modal-line').forEach(a => a.href = lineLink);
+        }
+
+        // 更新站点信息（Logo、名称）
+        function updateSiteInfo(config) {
+            if (config.logo) {
+                const logoImg = document.getElementById('site-logo');
+                logoImg.src = config.logo;
+                logoImg.classList.remove('hidden');
+                document.getElementById('nav-title').classList.add('hidden');
+            } else {
+                document.getElementById('nav-title').classList.remove('hidden');
+                document.getElementById('nav-title').innerText = getLocalized(config.siteName, currentLang);
+            }
+            document.getElementById('footer-site-name').innerText = getLocalized(config.siteName, currentLang);
+        }
+
+        // 渲染轮播图
+        function renderHero() {
+            const container = document.getElementById('hero-slider');
+            container.innerHTML = appData.heroSlides.map(slide => `
+                <div class="swiper-slide relative">
+                    <img src="${slide.img}" class="brightness-75 w-full h-full object-cover">
+                    <div class="absolute inset-0 flex items-center justify-center text-center text-white bg-black/30">
+                        <div>
+                            ${slide.showTaiji ? `<div class="text-7xl md:text-9xl taiji-spin mb-4 drop-shadow-2xl">☯️</div>` : ''}
+                            <h2 class="text-5xl md:text-7xl font-black gold-text" style="text-shadow:2px 2px 12px black;">${getLocalized(slide.mainTitle, currentLang)}</h2>
+                            <p class="text-xl md:text-3xl mt-3 font-light">${getLocalized(slide.subtitle, currentLang)}</p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function initSwiper() {
+            new Swiper('.hero-swiper', { loop: true, autoplay: { delay: 4500 }, pagination: { el: '.swiper-pagination', clickable: true }, effect: 'fade' });
+        }
+
+        // 页面文案
+        function renderPageTexts() {
+            const texts = appData.pageTexts[currentLang];
+            if (texts) {
+                document.getElementById('nav-title').innerText = texts.navTitle;
+                document.getElementById('about-title').innerText = texts.aboutTitle;
+                document.getElementById('about-desc').innerText = texts.aboutDesc;
+            }
+            document.getElementById('footer-copyright').innerHTML = getLocalized(appData.config.footer, currentLang);
+        }
+
+        function renderRitualSection() {
+            const ritual = appData.config.ritualSection;
+            document.getElementById('ritual-title').innerText = getLocalized(ritual.title, currentLang);
+            document.getElementById('ritual-desc').innerText = getLocalized(ritual.description, currentLang);
+        }
+
+        // 渲染分类
+        function renderCategories() {
+            const container = document.getElementById('category-tabs');
+            container.innerHTML = '';
+            const allCat = { key: "全部", name: { "zh-CN": "全部", "zh-TW": "全部", "en": "All", "ja": "すべて" } };
+            const cats = [allCat, ...appData.config.categories];
+            cats.forEach(cat => {
+                const displayName = getLocalized(cat.name, currentLang);
+                const btn = document.createElement('button');
+                btn.className = `px-6 py-2 rounded-full font-medium transition-all shadow ${currentCategory === cat.key ? 'category-active' : 'bg-white/80 border border-amber-300 hover:bg-amber-100'}`;
+                btn.textContent = displayName;
+                btn.onclick = () => { currentCategory = cat.key; renderCategories(); renderProducts(); };
+                container.appendChild(btn);
+            });
+        }
+
+        // 渲染商品
+        function renderProducts() {
+            const grid = document.getElementById('product-grid');
+            const filtered = currentCategory === "全部" ? appData.products : appData.products.filter(p => p.categoryKey === currentCategory);
+            grid.innerHTML = filtered.map(p => {
+                const name = getLocalized(p.name, currentLang);
+                const shortD = getLocalized(p.shortDesc, currentLang);
+                return `
+                    <div class="product-card overflow-hidden cursor-pointer group bg-white/90">
+                        <img src="${p.img}" class="w-full h-56 object-cover transition duration-500 group-hover:scale-105">
+                        <div class="p-5">
+                            <div class="text-xs text-amber-700 font-semibold">✦ ${p.categoryKey} ✦</div>
+                            <h3 class="text-xl font-bold mt-1 gold-text">${name}</h3>
+                            <p class="text-stone-500 text-sm my-2">${shortD}</p>
+                            <div class="flex justify-between items-center mt-3">
+                                <div><span class="text-2xl font-bold text-amber-700">¥${p.price}</span></div>
+                                <button onclick="event.stopPropagation();showModal(${p.id})" class="border border-amber-500 text-amber-700 px-4 py-1.5 rounded-full text-sm hover:bg-amber-500 hover:text-white transition">详请</button>
+                            </div>
+                            <div class="flex gap-2 mt-4">
+                                <a onclick="event.stopPropagation();consultProduct(${p.id},'wa')" class="flex-1 bg-[#25D366] text-white py-2 rounded-full flex items-center justify-center text-lg cursor-pointer"><i class="fa-brands fa-whatsapp"></i></a>
+                                <a onclick="event.stopPropagation();consultProduct(${p.id},'line')" class="flex-1 bg-[#00B900] text-white py-2 rounded-full flex items-center justify-center text-lg cursor-pointer"><i class="fa-brands fa-line"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function showModal(id) {
+            const p = appData.products.find(i => i.id === id);
+            if (!p) return;
+            document.getElementById('modal').setAttribute('data-pid', id);
+            document.getElementById('modal-title').innerText = getLocalized(p.name, currentLang);
+            document.getElementById('modal-image').src = p.img;
+            const descHtml = getLocalized(p.descHtml, currentLang) || `<p>${getLocalized(p.shortDesc, currentLang)}</p>`;
+            document.getElementById('modal-desc').innerHTML = descHtml;
+            document.getElementById('modal-price').innerHTML = `¥${p.price}`;
+            document.getElementById('modal-material').innerText = p.material || "雷击枣木";
+            const productInfo = `${getLocalized(p.name, currentLang)}（¥${p.price}）`;
+            const contacts = appData.config.contacts;
+            const waLink = `https://wa.me/${contacts.whatsapp}?text=${encodeURIComponent(`我想咨询：${productInfo}`)}`;
+            const lineLink = `https://line.me/ti/p/${contacts.line}?text=${encodeURIComponent(`我想咨询：${productInfo}`)}`;
+            document.getElementById('modal-wa').href = waLink;
+            document.getElementById('modal-line').href = lineLink;
+            document.getElementById('modal').classList.remove('hidden');
+        }
+
+        function consultProduct(id, type) {
+            const p = appData.products.find(i => i.id === id);
+            if (!p) return;
+            const productInfo = `${getLocalized(p.name, currentLang)}（¥${p.price}）`;
+            const contacts = appData.config.contacts;
+            const msg = encodeURIComponent(`我想咨询：${productInfo}`);
+            if (type === 'wa') window.open(`https://wa.me/${contacts.whatsapp}?text=${msg}`, '_blank');
+            else window.open(`https://line.me/ti/p/${contacts.line}?text=${msg}`, '_blank');
+        }
+
+        function closeModal() { document.getElementById('modal').classList.add('hidden'); }
+
+        // 购物车功能
+        function updateCartUI() {
+            const count = cart.reduce((s,i)=>s+i.qty,0);
+            document.getElementById('cart-count').innerText = count;
+            const container = document.getElementById('cart-items');
+            if(container){
+                if(cart.length===0) container.innerHTML = '<div class="text-center text-stone-400 py-8">暂无法物</div>';
+                else {
+                    container.innerHTML = cart.map((item,idx)=>{
+                        const prod = appData.products.find(p=>p.id===item.id);
+                        if(!prod) return '';
+                        const name = getLocalized(prod.name, currentLang);
+                        return `<div class="flex gap-3 border-b border-amber-200 pb-3"><img src="${prod.img}" class="w-16 h-16 rounded-xl object-cover"><div class="flex-1"><p class="font-bold">${name}</p><p class="gold-text font-semibold">¥${prod.price}</p><div class="flex items-center gap-2 mt-1"><button onclick="changeQty(${idx},-1)" class="bg-amber-200 w-6 h-6 rounded-full">-</button><span>${item.qty}</span><button onclick="changeQty(${idx},1)" class="bg-amber-200 w-6 h-6 rounded-full">+</button><button onclick="removeCartItem(${idx})" class="text-red-500 ml-2"><i class="fa-regular fa-trash-can"></i></button></div></div></div>`;
+                    }).join('');
+                }
+                const total = cart.reduce((s,item)=> s + (item.qty * (appData.products.find(p=>p.id===item.id)?.price||0)),0);
+                document.getElementById('cart-total').innerHTML = `¥${total}`;
+            }
+        }
+        function changeQty(idx,delta){ let q=cart[idx].qty+delta; if(q<=0) cart.splice(idx,1); else cart[idx].qty=q; updateCartUI(); localStorage.setItem('tao_cart',JSON.stringify(cart)); }
+        function removeCartItem(idx){ cart.splice(idx,1); updateCartUI(); localStorage.setItem('tao_cart',JSON.stringify(cart)); }
+        function addToCart(pid){ let e=cart.find(i=>i.id===pid); if(e) e.qty++; else cart.push({id:pid,qty:1}); updateCartUI(); localStorage.setItem('tao_cart',JSON.stringify(cart)); }
+        function addToCartFromModal(){ const pid=parseInt(document.getElementById('modal').getAttribute('data-pid')||'0'); if(pid) addToCart(pid); closeModal(); }
+        function toggleCartSidebar(){ const s=document.getElementById('cart-sidebar'),o=document.getElementById('cart-overlay'); s.classList.toggle('translate-x-full'); o.classList.toggle('hidden'); }
+        function checkoutCart(){ let msg="道长您好，我想结缘：\n"; cart.forEach(i=>{let p=appData.products.find(x=>x.id===i.id);if(p) msg+=`${getLocalized(p.name, currentLang)} x${i.qty}\n`;}); const wa = appData.config.contacts.whatsapp; window.open(`https://wa.me/${wa}?text=${encodeURIComponent(msg)}`,'_blank'); }
+
+        // 语言切换
+        function switchLang(lang) {
+            currentLang = lang;
+            renderLangSwitcher();
+            renderCategories();
+            renderProducts();
+            renderPageTexts();
+            renderRitualSection();
+            renderHero();
+            updateSiteInfo(appData.config);
+        }
+
+        function renderLangSwitcher() {
+            const langs = ['zh-CN', 'zh-TW', 'en', 'ja'];
+            const langNames = { 'zh-CN': '简', 'zh-TW': '繁', 'en': 'EN', 'ja': '日' };
+            const container = document.getElementById('lang-switcher');
+            container.innerHTML = langs.map(lang => `
+                <button onclick="switchLang('${lang}')" class="px-3 py-1 rounded-full text-sm ${currentLang===lang ? 'bg-amber-700 text-white' : 'bg-gray-100'}">${langNames[lang]}</button>
+            `).join('');
+        }
+
+        // 初始化购物车
+        const saved = localStorage.getItem('tao_cart');
+        if (saved) try{ cart = JSON.parse(saved); } catch(e) {}
+        loadData();
+    </script>
+</body>
+</html>
